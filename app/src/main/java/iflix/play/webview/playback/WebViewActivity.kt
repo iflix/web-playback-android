@@ -1,18 +1,16 @@
 package iflix.play.webview.playback
 
 import android.os.Build
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.annotation.RequiresApi
+import android.support.v7.app.AppCompatActivity
 import android.view.View
-import android.webkit.*
-import android.webkit.PermissionRequest
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import android.view.ViewGroup
 import android.view.WindowManager
-import iflix.play.webview.playback.R.id.webView
-
+import android.webkit.PermissionRequest
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
 
 class WebViewActivity : AppCompatActivity() {
 
@@ -30,7 +28,6 @@ class WebViewActivity : AppCompatActivity() {
         // Initialize the VideoEnabledWebChromeClient and set event handlers
         val nonVideoLayout = findViewById<View>(R.id.nonVideoLayout)
         val videoLayout = findViewById<ViewGroup>(R.id.videoLayout)
-
 
         setTitle("iflix webview test")
 
@@ -60,6 +57,9 @@ class WebViewActivity : AppCompatActivity() {
         settings.javaScriptCanOpenWindowsAutomatically = true
         settings.mediaPlaybackRequiresUserGesture = false
 
+        // include "partner/grab" in the user agent string for tracking
+        settings.userAgentString = System.getProperty("http.agent") + " partner/grab"
+
         // WebView settings
         webView.fitsSystemWindows = true
 
@@ -77,7 +77,6 @@ class WebViewActivity : AppCompatActivity() {
             }
         }
         webChromeClient.setOnToggledFullscreen { fullscreen ->
-            // Your code to handle the full-screen change, for example showing and hiding the title bar. Example:
             if (fullscreen) {
                 val attrs = window.attributes
                 attrs.flags = attrs.flags or WindowManager.LayoutParams.FLAG_FULLSCREEN
@@ -95,7 +94,10 @@ class WebViewActivity : AppCompatActivity() {
 
         webView.webChromeClient = webChromeClient
 
-        webView.loadUrl("https://m.iflix.com/movie/128530/play")
+        val assetType = "movie" // "movie" or "show" depending on asset toype
+        val assetId = "128530" // here pass the asset id to play
+
+        webView.loadUrl("https://m.iflix.com/" + assetType + "/" + assetId + "/play")
     }
 
     override fun onBackPressed() {
