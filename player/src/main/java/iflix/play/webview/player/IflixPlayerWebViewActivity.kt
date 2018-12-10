@@ -1,35 +1,45 @@
-package iflix.play.webview.playback
+package iflix.play.webview.player
 
+import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
 import android.support.annotation.RequiresApi
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.webkit.PermissionRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 
-class WebViewActivity : AppCompatActivity() {
+class IflixPlayerWebViewActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
     private lateinit var webChromeClient: VideoEnabledWebChromeClient
 
+    companion object {
+        val INTENT_IFLIX_ASSET_TYPE = "asset_type"
+        val INTENT_IFLIX_ASSET_ID = "asset_id"
+
+        val IFLIX_ASSET_TYPE_MOVIE = "movie"
+        val IFLIX_ASSET_TYPE_SHOW = "show"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // force
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
         setContentView(R.layout.activity_webview)
 
-        // Save the web view
         webView = findViewById(R.id.webView)
 
         // Initialize the VideoEnabledWebChromeClient and set event handlers
         val nonVideoLayout = findViewById<View>(R.id.nonVideoLayout)
         val videoLayout = findViewById<ViewGroup>(R.id.videoLayout)
 
-        setTitle("iflix webview test")
+        setTitle("")
 
         // Get the web view settings instance
         val settings = webView.settings
@@ -76,26 +86,15 @@ class WebViewActivity : AppCompatActivity() {
                 request!!.grant(arrayOf(PermissionRequest.RESOURCE_PROTECTED_MEDIA_ID))
             }
         }
-        webChromeClient.setOnToggledFullscreen { fullscreen ->
-            if (fullscreen) {
-                val attrs = window.attributes
-                attrs.flags = attrs.flags or WindowManager.LayoutParams.FLAG_FULLSCREEN
-                attrs.flags = attrs.flags or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                window.attributes = attrs
-                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LOW_PROFILE
-            } else {
-                val attrs = window.attributes
-                attrs.flags = attrs.flags and WindowManager.LayoutParams.FLAG_FULLSCREEN.inv()
-                attrs.flags = attrs.flags and WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON.inv()
-                window.attributes = attrs
-                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
-            }
-        }
+
+        // force fullscreen
+        window.decorView.makeFullscreen()
 
         webView.webChromeClient = webChromeClient
 
-        val assetType = "movie" // "movie" or "show" depending on asset toype
-        val assetId = "128530" // here pass the asset id to play
+        // load the intent params
+        val assetType = intent.getStringExtra(INTENT_IFLIX_ASSET_TYPE)
+        val assetId = intent.getStringExtra(INTENT_IFLIX_ASSET_ID)
 
         webView.loadUrl("https://m.iflix.com/" + assetType + "/" + assetId + "/play")
     }
@@ -112,3 +111,24 @@ class WebViewActivity : AppCompatActivity() {
         }
     }
 }
+
+// making views full screen or non-immersive full screen
+fun View.makeFullscreen() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        this.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+    } else {
+        makeNonImmersiveFullscreen()
+    }
+}
+
+fun View.makeNonImmersiveFullscreen() {
+    this.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            or View.SYSTEM_UI_FLAG_FULLSCREEN)
+}
+

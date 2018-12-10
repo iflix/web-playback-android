@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="iflix.play.webview.playback">
+          package="iflix.play.webview.example">
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
@@ -15,9 +15,7 @@
             android:theme="@style/AppTheme">
 
         <activity
-                android:name="iflix.play.webview.playback.WebViewActivity"
-                android:configChanges="orientation|keyboardHidden|screenSize"
-                android:screenOrientation="landscape">
+                android:name="iflix.play.webview.example.IflixPlayerExampleActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

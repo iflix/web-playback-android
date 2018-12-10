@@ -1,4 +1,4 @@
-package iflix.play.webview.playback;
+package iflix.play.webview.player;
 
 import android.media.MediaPlayer;
 import android.view.SurfaceView;

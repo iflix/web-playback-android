@@ -1,4 +1,4 @@
-package iflix.play.webview.playback;
+package iflix.play.webview.player;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
