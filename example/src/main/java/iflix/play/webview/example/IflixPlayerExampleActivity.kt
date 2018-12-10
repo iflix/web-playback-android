@@ -17,8 +17,8 @@ class IflixPlayerExampleActivity : AppCompatActivity() {
         val intent = Intent(this, IflixPlayerWebViewActivity::class.java)
         intent.putExtra(INTENT_IFLIX_ASSET_TYPE, IFLIX_ASSET_TYPE_MOVIE) // IFLIX_ASSET_TYPE_MOVIE or IFLIX_ASSET_TYPE_SHOW
         intent.putExtra(INTENT_IFLIX_ASSET_ID, "128530") // wheely movie id
-
         startActivity(intent)
+
         finish()
     }
 
