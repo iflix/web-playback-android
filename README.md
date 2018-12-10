@@ -34,3 +34,5 @@ intent.putExtra(INTENT_IFLIX_ASSET_TYPE, IFLIX_ASSET_TYPE_MOVIE) // IFLIX_ASSET_
 intent.putExtra(INTENT_IFLIX_ASSET_ID, "128530") // wheely movie id
 startActivity(intent)
 ```
+
+Example code is provided in the project as well as source code for the `IflixWebViewPlayerActivity`
