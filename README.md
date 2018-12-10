@@ -26,7 +26,7 @@ Start the `IflixPlayerWebViewActivity` passing in the values for `INTENT_IFLIX_A
 
 `INTENT_IFLIX_ASSET_ID` must be the asset ID of the movie or show.
 
-Example code
+Example code in Kotlin
 
 ```
 val intent = Intent(this, IflixPlayerWebViewActivity::class.java)
