@@ -87,6 +87,10 @@ class IflixPlayerWebViewActivity : AppCompatActivity() {
             }
         }
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            WebView.setWebContentsDebuggingEnabled(true)
+        }
+
         // force fullscreen
         window.decorView.makeFullscreen()
 
@@ -96,7 +100,18 @@ class IflixPlayerWebViewActivity : AppCompatActivity() {
         val assetType = intent.getStringExtra(INTENT_IFLIX_ASSET_TYPE)
         val assetId = intent.getStringExtra(INTENT_IFLIX_ASSET_ID)
 
-        webView.loadUrl("https://m.iflix.com/" + assetType + "/" + assetId + "/play")
+        val url = "https://m.iflix.com/embed/" + assetType + "/" + assetId
+        webView.loadDataWithBaseURL(
+            "https://m.iflix.com",
+            "<iframe src=\""+ url + "\" " +
+                    "frameborder=\"0\" " +
+                    "scrolling=\"no\" " +
+                    "allowtransparency=\"true\" " +
+                    "sandbox=\"allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts\">" +
+                    "</iframe>",
+            "text/html",
+            "utf-8",
+            null)
     }
 
     override fun onBackPressed() {
