@@ -96,7 +96,7 @@ class IflixPlayerWebViewActivity : AppCompatActivity() {
         val assetType = intent.getStringExtra(INTENT_IFLIX_ASSET_TYPE)
         val assetId = intent.getStringExtra(INTENT_IFLIX_ASSET_ID)
 
-        webView.loadUrl("https://m.iflix.com/" + assetType + "/" + assetId + "/play")
+        webView.loadUrl("https://m.iflix.com/embed/" + assetType + "/" + assetId)
     }
 
     override fun onBackPressed() {
