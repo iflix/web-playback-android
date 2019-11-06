@@ -3,6 +3,7 @@ package iflix.play.webview.player
 import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
+import android.os.Message
 import android.support.annotation.RequiresApi
 import android.support.v7.app.AppCompatActivity
 import android.view.View
@@ -11,6 +12,14 @@ import android.webkit.PermissionRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.support.v4.content.ContextCompat.startActivity
+import android.content.Intent
+import android.net.Uri
+import android.util.Log
+import android.support.v4.content.ContextCompat.startActivity
+
+
+
 
 class IflixPlayerWebViewActivity : AppCompatActivity() {
 
@@ -29,7 +38,7 @@ class IflixPlayerWebViewActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         // force
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
 
         setContentView(R.layout.activity_webview)
 
@@ -68,14 +77,18 @@ class IflixPlayerWebViewActivity : AppCompatActivity() {
         settings.mediaPlaybackRequiresUserGesture = false
 
         // include "partner/grab" in the user agent string for tracking
-        settings.userAgentString = System.getProperty("http.agent") + " partner/grab"
+        settings.userAgentString = System.getProperty("http.agent") + " partner/webtest"
 
         // WebView settings
         webView.fitsSystemWindows = true
 
         webView.webViewClient = object: WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
-                view.loadUrl(url)
+                if (url.contains("/embed") && url.contains("iflix.com")) {
+                    view.loadUrl(url)
+                } else {
+                    view.getContext()?.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                }
                 return true
             }
         }
@@ -84,6 +97,11 @@ class IflixPlayerWebViewActivity : AppCompatActivity() {
             @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
             override fun onPermissionRequest(request: PermissionRequest?) {
                 request!!.grant(arrayOf(PermissionRequest.RESOURCE_PROTECTED_MEDIA_ID))
+            }
+
+            override fun onCreateWindow(view: WebView?, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message?): Boolean {
+                view?.getContext()?.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(view.getHitTestResult().extra)))
+                return false
             }
         }
 
@@ -96,7 +114,8 @@ class IflixPlayerWebViewActivity : AppCompatActivity() {
         val assetType = intent.getStringExtra(INTENT_IFLIX_ASSET_TYPE)
         val assetId = intent.getStringExtra(INTENT_IFLIX_ASSET_ID)
 
-        webView.loadUrl("https://m.iflix.com/embed/" + assetType + "/" + assetId)
+        val url = "https://www.iflix.com/embed/short/112774"
+        webView.loadUrl(url)
     }
 
     override fun onBackPressed() {
