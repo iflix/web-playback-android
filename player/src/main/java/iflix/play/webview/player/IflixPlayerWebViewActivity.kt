@@ -19,6 +19,10 @@ import android.widget.TextView
 
 class IflixPlayerWebViewActivity : AppCompatActivity() {
 
+    init {
+        WebView.setWebContentsDebuggingEnabled(true)
+    }
+
     private var playing: Boolean = false
     private lateinit var magicButton: Button
     private lateinit var debugView: TextView
