@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import android.webkit.*
 import android.widget.Button
 import android.widget.TextView
@@ -44,11 +45,12 @@ class IflixPlayerWebViewActivity : AppCompatActivity() {
         debugView = findViewById(R.id.debug_view)
         magicButton = findViewById(R.id.magic_button)
         magicButton.setOnClickListener {
+            Log.d("MagicButtonDispatch", "MagicButtonDispatch sending " + if (playing) "pause event" else "play event")
             webView.evaluateJavascript(if (playing) {
-                "window.dispatchEvent(new Event('video-pause'))"
+                "window.dispatchEvent(new Event('video-pause'));"
             } else {
-                "window.dispatchEvent(new Event('video-play'))"
-            }) {}
+                "window.dispatchEvent(new Event('video-play'));"
+            }) { Log.d("MagicButtonDispatch", "MagicButtonDispatch Result: $it")}
         }
 
         // Initialize the VideoEnabledWebChromeClient and set event handlers
@@ -152,26 +154,35 @@ class IflixPlayerWebViewActivity : AppCompatActivity() {
         class IflixJavascriptInterface(private val context: Context) {
             @JavascriptInterface
             fun isLoaded() {
-                debugView.text = "State: Loaded"
+                runOnUiThread {
+                    debugView.text = "State: Loaded"
+                    updateButtonState()
+                }
             }
 
             @JavascriptInterface
             fun isLoading() {
-                debugView.text = "State: Loading"
+                runOnUiThread {
+                    debugView.text = "State: Loading"
+                }
             }
 
             @JavascriptInterface
             fun isPlaying() {
-                debugView.text = "State: Playing"
-                playing = true
-                updateButtonState()
+                runOnUiThread {
+                    debugView.text = "State: Playing"
+                    playing = true
+                    updateButtonState()
+                }
             }
 
             @JavascriptInterface
             fun isPaused() {
-                debugView.text = "State: Paused"
-                playing = false
-                updateButtonState()
+                runOnUiThread {
+                    debugView.text = "State: Paused"
+                    playing = false
+                    updateButtonState()
+                }
             }
         }
         webView.addJavascriptInterface(IflixJavascriptInterface(this), "iflixCallbacks")
