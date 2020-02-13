@@ -1,5 +1,6 @@
 package iflix.play.webview.player
 
+import android.content.Context
 import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
@@ -8,21 +9,23 @@ import android.support.annotation.RequiresApi
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.PermissionRequest
-import android.webkit.WebSettings
-import android.webkit.WebView
-import android.webkit.WebViewClient
-import android.support.v4.content.ContextCompat.startActivity
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
-import android.support.v4.content.ContextCompat.startActivity
-
-
+import android.webkit.*
+import android.widget.Button
+import android.widget.TextView
 
 
 class IflixPlayerWebViewActivity : AppCompatActivity() {
 
+    init {
+        WebView.setWebContentsDebuggingEnabled(true)
+    }
+
+    private var playing: Boolean = false
+    private lateinit var magicButton: Button
+    private lateinit var debugView: TextView
     private lateinit var webView: WebView
     private lateinit var webChromeClient: VideoEnabledWebChromeClient
 
@@ -43,6 +46,16 @@ class IflixPlayerWebViewActivity : AppCompatActivity() {
         setContentView(R.layout.activity_webview)
 
         webView = findViewById(R.id.webView)
+        debugView = findViewById(R.id.debug_view)
+        magicButton = findViewById(R.id.magic_button)
+        magicButton.setOnClickListener {
+            Log.d("MagicButtonDispatch", "MagicButtonDispatch sending " + if (playing) "pause event" else "play event")
+            webView.evaluateJavascript(if (playing) {
+                "window.dispatchEvent(new Event('video-pause'));"
+            } else {
+                "window.dispatchEvent(new Event('video-play'));"
+            }) { Log.d("MagicButtonDispatch", "MagicButtonDispatch Result: $it")}
+        }
 
         // Initialize the VideoEnabledWebChromeClient and set event handlers
         val nonVideoLayout = findViewById<View>(R.id.nonVideoLayout)
@@ -83,6 +96,11 @@ class IflixPlayerWebViewActivity : AppCompatActivity() {
         webView.fitsSystemWindows = true
 
         webView.webViewClient = object: WebViewClient() {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                setUpEventListeners(view ?: return)
+            }
+
             override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
                 if (url.contains("/embed") && url.contains("iflix.com")) {
                     view.loadUrl(url)
@@ -114,8 +132,64 @@ class IflixPlayerWebViewActivity : AppCompatActivity() {
         val assetType = intent.getStringExtra(INTENT_IFLIX_ASSET_TYPE)
         val assetId = intent.getStringExtra(INTENT_IFLIX_ASSET_ID)
 
-        val url = "https://www.iflix.com/embed/short/112774"
+        val url = "https://www.iflix.com/embed/$assetType/$assetId"
         webView.loadUrl(url)
+        bindJavascriptInterface(webView)
+    }
+
+    private fun updateButtonState() {
+        if (playing) {
+            magicButton.text = "Pause"
+        } else {
+            magicButton.text = "Play"
+        }
+    }
+
+    private fun setUpEventListeners(webView: WebView) {
+        webView.evaluateJavascript("""
+            window.addEventListener('video-isLoaded', function () { iflixCallbacks.isLoaded() });
+            window.addEventListener('video-isLoading', function () { iflixCallbacks.isLoading() });
+            window.addEventListener('video-isPlaying', function () { iflixCallbacks.isPlaying() });
+            window.addEventListener('video-isPaused', function () { iflixCallbacks.isPaused() });
+        """) {}
+    }
+
+    private fun bindJavascriptInterface(webView: WebView) {
+        class IflixJavascriptInterface(private val context: Context) {
+            @JavascriptInterface
+            fun isLoaded() {
+                runOnUiThread {
+                    debugView.text = "State: Loaded"
+                    updateButtonState()
+                }
+            }
+
+            @JavascriptInterface
+            fun isLoading() {
+                runOnUiThread {
+                    debugView.text = "State: Loading"
+                }
+            }
+
+            @JavascriptInterface
+            fun isPlaying() {
+                runOnUiThread {
+                    debugView.text = "State: Playing"
+                    playing = true
+                    updateButtonState()
+                }
+            }
+
+            @JavascriptInterface
+            fun isPaused() {
+                runOnUiThread {
+                    debugView.text = "State: Paused"
+                    playing = false
+                    updateButtonState()
+                }
+            }
+        }
+        webView.addJavascriptInterface(IflixJavascriptInterface(this), "iflixCallbacks")
     }
 
     override fun onBackPressed() {
