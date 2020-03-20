@@ -27,11 +27,7 @@ class IflixPlayerWebViewActivity : AppCompatActivity() {
     private lateinit var webChromeClient: VideoEnabledWebChromeClient
 
     companion object {
-        val INTENT_IFLIX_ASSET_TYPE = "asset_type"
-        val INTENT_IFLIX_ASSET_ID = "asset_id"
-
-        val IFLIX_ASSET_TYPE_MOVIE = "movie"
-        val IFLIX_ASSET_TYPE_SHOW = "show"
+        val INTENT_IFLIX_ASSET_URL = "asset_url"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -111,11 +107,24 @@ class IflixPlayerWebViewActivity : AppCompatActivity() {
         webView.webChromeClient = webChromeClient
 
         // load the intent params
-        val assetType = intent.getStringExtra(INTENT_IFLIX_ASSET_TYPE)
-        val assetId = intent.getStringExtra(INTENT_IFLIX_ASSET_ID)
+        val assetUrl = intent.getStringExtra(INTENT_IFLIX_ASSET_URL) ?: "https://www.iflix.com/embed/short/112774"
 
-        val url = "https://www.iflix.com/embed/short/112774"
-        webView.loadUrl(url)
+        webView.loadUrl(assetUrl)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        webView.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        webView.onResume()
+    }
+
+    override fun onDestroy() {
+        webView.destroy()
+        super.onDestroy()
     }
 
     override fun onBackPressed() {
